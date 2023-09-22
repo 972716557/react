@@ -6,20 +6,18 @@ import { UpdateQueue, processUpdateQueue } from './updateQueue';
 import { HostComponent, HostRoot, HostText } from './workTags';
 import { mountChildFibers, reconcileChildFibers } from './childFiber';
 
-export const beginWork = (workInProgress: FiberNode) => {
+export const beginWork = (workInProgress: FiberNode): FiberNode | null => {
 	// 比较然后再返回子fiberNode
 	switch (workInProgress.tag) {
 		case HostRoot:
-			updateHostRoot(workInProgress);
-			return;
+			return updateHostRoot(workInProgress);
 		case HostComponent:
-			updateHostComponent(workInProgress);
-			return;
+			return updateHostComponent(workInProgress);
 		case HostText:
-			return null;
+			return updateHostComponent(workInProgress);
 		default:
 			if (__DEV__) {
-				console.warn('');
+				console.warn('beginWork');
 			}
 	}
 	return null;

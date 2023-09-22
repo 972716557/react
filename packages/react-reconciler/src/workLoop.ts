@@ -1,6 +1,8 @@
 import { beginWork } from './beginWork';
+import { commitMutationEffect } from './commitWork';
 import { completeWork } from './completeWork';
 import { FiberNode, FiberRootNode, createWorkProgress } from './fiber';
+import { MutationMask, NoFlags } from './fiberFlags';
 import { HostRoot } from './workTags';
 
 let workInProgress: FiberNode | null = null;
@@ -47,6 +49,34 @@ function renderRoot(root: FiberRootNode) {
 	commitRoot(root);
 }
 
+function commitRoot(root: FiberRootNode) {
+	const finishedWork = root.finishedWork;
+	if (finishedWork === null) {
+		return;
+	}
+	if (__DEV__) {
+		console.warn('commitRoot阶段开始', finishedWork);
+	}
+
+	root.finishedWork = null;
+
+	//判断是否存在3个字阶段需要执行的操作
+	// root flags root subtreeFlags
+	const subtreeHaasEffect =
+		(finishedWork.subtreeFlags & MutationMask) !== NoFlags;
+	const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags;
+
+	if (subtreeHaasEffect || rootHasEffect) {
+		// beforeMutation
+		// mutation Placement
+		commitMutationEffect(finishedWork);
+
+		root.current = finishedWork;
+		//layout
+	} else {
+		root.current = finishedWork;
+	}
+}
 function workLoop() {
 	while (workInProgress !== null) {
 		preformUnitOfWork(workInProgress);
@@ -55,6 +85,7 @@ function workLoop() {
 function preformUnitOfWork(fiber: FiberNode) {
 	const next = beginWork(fiber);
 	fiber.memoizedProps = fiber.pendingProps;
+	console.log('preformUnitOfWork');
 	if (next === null) {
 		completeUnitOfWork(fiber);
 	} else {

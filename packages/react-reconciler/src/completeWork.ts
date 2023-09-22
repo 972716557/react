@@ -1,4 +1,5 @@
 import {
+	Container,
 	appendInitialChild,
 	createInstance,
 	createTextInstance
@@ -17,7 +18,8 @@ export const completeWork = (workInProgress: FiberNode) => {
 				// update
 			} else {
 				// 1.构建DOM
-				const instance = createInstance(workInProgress.type, newProps);
+				// const instance = createInstance(workInProgress.type, newProps);
+				const instance = createInstance(workInProgress.type);
 				// 2.将DOM插入DOM树中
 				appendAllChildren(instance, workInProgress);
 				workInProgress.stateNode = instance;
@@ -25,6 +27,7 @@ export const completeWork = (workInProgress: FiberNode) => {
 			bubbleProperties(workInProgress);
 			return null;
 		case HostText:
+			console.log(workInProgress, 'workInProgress');
 			if (current !== null && workInProgress.stateNode) {
 				// update
 			} else {
@@ -46,7 +49,7 @@ export const completeWork = (workInProgress: FiberNode) => {
 	}
 };
 
-function appendAllChildren(parent: FiberNode, workInProgress: FiberNode) {
+function appendAllChildren(parent: Container, workInProgress: FiberNode) {
 	// 从下往上递归，先找child，如有一直往下，没有找兄弟节点，还没有就返回父亲，
 	// 如果父亲跟最开始传入的fiber是一样的，就表明全部渲染完成
 	let node = workInProgress.child;

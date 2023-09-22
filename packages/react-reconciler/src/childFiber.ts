@@ -32,6 +32,7 @@ function childReconciler(shouldTrackEffects: boolean) {
 		}
 		return fiber;
 	}
+
 	return function reconcileChildrenFibers(
 		returnFiber: FiberNode,
 		currentFiber: FiberNode | null,
@@ -52,7 +53,7 @@ function childReconciler(shouldTrackEffects: boolean) {
 			}
 		}
 		// TOD 多节点类型
-
+		console.log(returnFiber, 'returnFiber');
 		// HostText
 		if (typeof newChild === 'string' || typeof newChild === 'number') {
 			placeSingleChild(
