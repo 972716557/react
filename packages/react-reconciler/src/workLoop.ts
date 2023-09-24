@@ -64,11 +64,11 @@ function commitRoot(root: FiberRootNode) {
 
 	//判断是否存在3个字阶段需要执行的操作
 	// root flags root subtreeFlags
-	const subtreeHaasEffect =
+	const subtreeHasEffect =
 		(finishedWork.subtreeFlags & MutationMask) !== NoFlags;
 	const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags;
 
-	if (subtreeHaasEffect || rootHasEffect) {
+	if (subtreeHasEffect || rootHasEffect) {
 		// beforeMutation
 		// mutation Placement
 		commitMutationEffect(finishedWork);
