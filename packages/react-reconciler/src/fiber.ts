@@ -18,7 +18,7 @@ export class FiberNode {
 	alternate: FiberNode | null;
 	flags: Flags;
 	updateQueue: unknown;
-	memoizedSate: any;
+	memorizeState: any;
 	subtreeFlags: Flags;
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
@@ -59,7 +59,7 @@ export class FiberNode {
 		this.flags = NoFlags;
 		this.updateQueue = null;
 
-		this.memoizedSate = null;
+		this.memorizeState = null;
 
 		this.subtreeFlags = NoFlags;
 	}
@@ -100,7 +100,7 @@ export const createWorkProgress = (
 	workInProgress.updateQueue = current.updateQueue;
 	workInProgress.child = current.child;
 	workInProgress.memoizedProps = current.memoizedProps;
-	workInProgress.memoizedSate = current.memoizedSate;
+	workInProgress.memorizeState = current.memorizeState;
 	return workInProgress;
 };
 
