@@ -18,7 +18,7 @@ importers:
         specifier: ^5.0.2
         version: 5.0.2(rollup@3.29.2)
       '@types/react':
-        specifier: ^18.2.15
+        specifier: ^18.2.22
         version: 18.2.22
       '@types/react-dom':
         specifier: ^18.2.7

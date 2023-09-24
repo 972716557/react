@@ -6,7 +6,7 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build:dev": "rimraf dist && rollup --bundleConfigAsCjs --config scripts/rollup/dev.config.js",
-		"demo": "vite serve demo/test-fc --config scripts/rollup/dev.config.js --force"
+		"demo": "vite serve demo/test-fc --config scripts/vite/vite.config.js --force"
 	},
 	"keywords": [],
 	"author": "",
@@ -15,7 +15,7 @@
 		"@rollup/plugin-alias": "^5.0.0",
 		"@rollup/plugin-commonjs": "^25.0.4",
 		"@rollup/plugin-replace": "^5.0.2",
-		"@types/react": "^18.2.15",
+		"@types/react": "^18.2.22",
 		"@types/react-dom": "^18.2.7",
 		"@typescript-eslint/eslint-plugin": "^6.7.0",
 		"@typescript-eslint/parser": "^6.7.0",
