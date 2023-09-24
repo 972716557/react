@@ -3,8 +3,14 @@
 import { ReactElementType } from 'shared/ReactTypes';
 import { FiberNode } from './fiber';
 import { UpdateQueue, processUpdateQueue } from './updateQueue';
-import { HostComponent, HostRoot, HostText } from './workTags';
+import {
+	FunctionComponent,
+	HostComponent,
+	HostRoot,
+	HostText
+} from './workTags';
 import { mountChildFibers, reconcileChildFibers } from './childFiber';
+import { renderWithHooks } from './fiberHooks';
 
 export const beginWork = (workInProgress: FiberNode): FiberNode | null => {
 	// 比较然后再返回 “子fiberNode”
@@ -15,6 +21,8 @@ export const beginWork = (workInProgress: FiberNode): FiberNode | null => {
 			return updateHostComponent(workInProgress);
 		case HostText:
 			return null;
+		case FunctionComponent:
+			return updateFunctionComponent(workInProgress);
 		default:
 			if (__DEV__) {
 				console.warn('beginWork未实现的类型');
@@ -23,6 +31,12 @@ export const beginWork = (workInProgress: FiberNode): FiberNode | null => {
 	}
 	return null;
 };
+
+function updateFunctionComponent(workInProgress: FiberNode) {
+	const nextChildren = renderWithHooks(workInProgress);
+	reconcileChildren(workInProgress, nextChildren);
+	return workInProgress.child;
+}
 function updateHostRoot(workInProgress: FiberNode) {
 	const baseState = workInProgress.memoizedSate;
 	const updateQueue = workInProgress.updateQueue as UpdateQueue<Element>;
