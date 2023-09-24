@@ -27,7 +27,6 @@ export const completeWork = (workInProgress: FiberNode) => {
 			bubbleProperties(workInProgress);
 			return null;
 		case HostText:
-			console.log(workInProgress, 'workInProgress');
 			if (current !== null && workInProgress.stateNode) {
 				// update
 			} else {

@@ -80,5 +80,6 @@ export const jsxDEV = (type: ElementType, config: any) => {
 			props[prop] = val;
 		}
 	}
+
 	return ReactElement(type, key, ref, props);
 };

@@ -7,18 +7,19 @@ import { HostComponent, HostRoot, HostText } from './workTags';
 import { mountChildFibers, reconcileChildFibers } from './childFiber';
 
 export const beginWork = (workInProgress: FiberNode): FiberNode | null => {
-	// 比较然后再返回子fiberNode
+	// 比较然后再返回 “子fiberNode”
 	switch (workInProgress.tag) {
 		case HostRoot:
 			return updateHostRoot(workInProgress);
 		case HostComponent:
 			return updateHostComponent(workInProgress);
 		case HostText:
-			return updateHostComponent(workInProgress);
+			return null;
 		default:
 			if (__DEV__) {
-				console.warn('beginWork');
+				console.warn('beginWork未实现的类型');
 			}
+			break;
 	}
 	return null;
 };
@@ -41,11 +42,13 @@ function updateHostComponent(workInProgress: FiberNode) {
 	return workInProgress.child;
 }
 
+// 递归的递阶段
 function reconcileChildren(
 	workInProgress: FiberNode,
 	children?: ReactElementType
 ) {
-	const current = workInProgress;
+	// 获取双缓存树的旧树
+	const current = workInProgress.alternate;
 
 	if (current !== null) {
 		// 更新

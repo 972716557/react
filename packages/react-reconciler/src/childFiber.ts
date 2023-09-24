@@ -4,13 +4,13 @@ import { REACT_ELEMENT_TYPE } from 'shared/ReactSymbols';
 import { HostText } from './workTags';
 import { Placement } from './fiberFlags';
 
-//
 function childReconciler(shouldTrackEffects: boolean) {
 	function reconcileSingleElement(
 		returnFiber: FiberNode,
 		currentFiber: FiberNode | null,
 		element: ReactElementType
 	) {
+		// 根据reactType创建fiber，然后返回
 		const fiber = createFiberFromElement(element);
 		fiber.return = returnFiber;
 		return fiber;
@@ -53,10 +53,10 @@ function childReconciler(shouldTrackEffects: boolean) {
 			}
 		}
 		// TOD 多节点类型
-		console.log(returnFiber, 'returnFiber');
+
 		// HostText
 		if (typeof newChild === 'string' || typeof newChild === 'number') {
-			placeSingleChild(
+			return placeSingleChild(
 				reconcilerSingleTextNode(returnFiber, currentFiber, newChild)
 			);
 		}

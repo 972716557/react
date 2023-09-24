@@ -20,11 +20,12 @@ export function scheduleUpdateOnFiber(fiber: FiberNode) {
 function markUpdateFromFiberOnFiber(fiber: FiberNode) {
 	let node = fiber;
 	let parent = node.return;
-	// 这表示当前节点就是一个普通节点，因为跟节点的父节点是null
+	// 这表示当前节点就是一个普通节点而不是根节点
 	while (parent !== null) {
 		node = parent;
 		parent = node.return;
 	}
+	// 根节点直接返回stateNode
 	if (node.tag === HostRoot) {
 		return node.stateNode;
 	}
@@ -42,6 +43,7 @@ function renderRoot(root: FiberRootNode) {
 		} catch (e) {
 			console.warn('workLoop发生错误');
 		}
+		workInProgress = null;
 	} while (true);
 	const finishedWork = root.current.alternate;
 	root.finishedWork = finishedWork;
@@ -84,8 +86,8 @@ function workLoop() {
 }
 function preformUnitOfWork(fiber: FiberNode) {
 	const next = beginWork(fiber);
+
 	fiber.memoizedProps = fiber.pendingProps;
-	console.log('preformUnitOfWork');
 	if (next === null) {
 		completeUnitOfWork(fiber);
 	} else {
