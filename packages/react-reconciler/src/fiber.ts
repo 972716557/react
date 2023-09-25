@@ -18,9 +18,10 @@ export class FiberNode {
 	alternate: FiberNode | null;
 	flags: Flags;
 	updateQueue: unknown;
-	memorizeState: any;
+	memorizedState: any;
 	subtreeFlags: Flags;
-
+	// 待删除的fiber
+	deletions: FiberNode[] | null;
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
 		// 组件类型
 		this.tag = tag;
@@ -59,9 +60,11 @@ export class FiberNode {
 		this.flags = NoFlags;
 		this.updateQueue = null;
 
-		this.memorizeState = null;
+		this.memorizedState = null;
 
 		this.subtreeFlags = NoFlags;
+
+		this.deletions = null;
 	}
 }
 
@@ -95,12 +98,13 @@ export const createWorkProgress = (
 		workInProgress.pendingProps = pendingProps;
 		workInProgress.flags = NoFlags;
 		workInProgress.subtreeFlags = NoFlags;
+		workInProgress.deletions = null;
 	}
 	workInProgress.type = current.type;
 	workInProgress.updateQueue = current.updateQueue;
 	workInProgress.child = current.child;
 	workInProgress.memoizedProps = current.memoizedProps;
-	workInProgress.memorizeState = current.memorizeState;
+	workInProgress.memorizedState = current.memorizedState;
 	return workInProgress;
 };
 

@@ -38,13 +38,13 @@ function updateFunctionComponent(workInProgress: FiberNode) {
 	return workInProgress.child;
 }
 function updateHostRoot(workInProgress: FiberNode) {
-	const baseState = workInProgress.memorizeState;
+	const baseState = workInProgress.memorizedState;
 	const updateQueue = workInProgress.updateQueue as UpdateQueue<Element>;
 	const pending = updateQueue.shared.pending;
 	updateQueue.shared.pending = null;
-	const { memoizedState } = processUpdateQueue(baseState, pending);
-	workInProgress.memorizeState = memoizedState;
-	const nextChildren = workInProgress.memorizeState;
+	const { memorizedState } = processUpdateQueue(baseState, pending);
+	workInProgress.memorizedState = memorizedState;
+	const nextChildren = workInProgress.memorizedState;
 	reconcileChildren(workInProgress, nextChildren);
 	return workInProgress.child;
 }
