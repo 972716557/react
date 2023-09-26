@@ -18,6 +18,14 @@ function childReconciler(shouldTrackEffects: boolean) {
 		}
 	}
 
+	function deleteRemainingChildren(
+		returnFiber: FiberNode,
+		currentFirstChild: FiberNode | null
+	) {
+		if (!shouldTrackEffects) {
+			return;
+		}
+	}
 	function reconcileSingleElement(
 		returnFiber: FiberNode,
 		currentFiber: FiberNode | null,
@@ -25,7 +33,7 @@ function childReconciler(shouldTrackEffects: boolean) {
 	) {
 		// 根据reactType创建fiber，然后返回
 		const key = element.key;
-		work: if (currentFiber !== null) {
+		while (currentFiber !== null) {
 			// update
 			if (currentFiber.key === key) {
 				// key 相同
@@ -34,15 +42,14 @@ function childReconciler(shouldTrackEffects: boolean) {
 						// type 相同
 						const existing = useFiber(currentFiber, element.props);
 						existing.return = returnFiber;
+						// 标记剩下节点为删除
 						return existing;
 					}
 					// 删掉旧的
 					deleteChild(returnFiber, currentFiber);
-					break work;
 				} else {
 					if (__DEV__) {
 						console.warn('还未实现的react类型', element);
-						break work;
 					}
 				}
 			} else {

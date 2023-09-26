@@ -3,8 +3,15 @@ import ReactDOM from 'react-dom/client';
 
 function App() {
 	const [number, setNumber] = useState<number>(1);
-	window.setNumber = setNumber;
-	return number === 3 ? <Child /> : <div>{number}</div>;
+	return (
+		<div
+			onClickCapture={() => {
+				setNumber(number + 1);
+			}}
+		>
+			{number}
+		</div>
+	);
 }
 
 function Child() {
