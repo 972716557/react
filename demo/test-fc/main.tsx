@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 
 function App() {
-	const [number, setNumber] = useState<number>(1);
+	const [number, setNumber] = useState<boolean>(false);
+	const arr = number
+		? [<li key="1">1</li>, <li key="2">2</li>, <li key="3">3</li>]
+		: [<li key="3">3</li>, <li key="2">2</li>, <li key="1">1</li>];
 	return (
 		<div
 			onClickCapture={() => {
-				setNumber(number + 1);
+				setNumber(!number);
 			}}
 		>
-			{number}
+			{arr}
 		</div>
 	);
 }

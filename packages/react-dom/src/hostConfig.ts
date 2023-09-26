@@ -1,13 +1,13 @@
 import { FiberNode } from 'react-reconciler/src/fiber';
 import { HostText } from 'react-reconciler/src/workTags';
 import { updateFibreProps } from './syntheticEvent';
-import { ElementType } from 'shared/ReactTypes';
+import { ElementType, Props } from 'shared/ReactTypes';
 
-export type Container = any;
+export type Container = Element;
 export type Instance = Element;
 export type TextInstance = Text;
 
-export const createInstance = (type: string, props: any) => {
+export const createInstance = (type: string, props: Props) => {
 	const element = document.createElement(type);
 	updateFibreProps(element as ElementType, props);
 
@@ -49,4 +49,12 @@ export function removeChild(
 	container: Container
 ) {
 	container.removeChild(child);
+}
+
+export function insertChildToContainer(
+	child: Instance,
+	container: Container,
+	before: Instance
+) {
+	container.insertBefore(child, before);
 }
