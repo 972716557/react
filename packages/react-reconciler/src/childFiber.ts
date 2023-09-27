@@ -1,7 +1,12 @@
-import { Props, ReactElementType } from 'shared/ReactTypes';
-import { FiberNode, createFiberFromElement, createWorkProgress } from './fiber';
-import { REACT_ELEMENT_TYPE } from 'shared/ReactSymbols';
-import { HostText } from './workTags';
+import { Key, Props, ReactElementType } from 'shared/ReactTypes';
+import {
+	FiberNode,
+	createFiberFromElement,
+	createFiberFromFragment,
+	createWorkProgress
+} from './fiber';
+import { REACT_ELEMENT_TYPE, REACT_FRAGMENT_TYPE } from 'shared/ReactSymbols';
+import { Fragment, HostText } from './workTags';
 import { ChildDeletion, Placement } from './fiberFlags';
 
 type ExistingChildren = Map<string | number, FiberNode>;
@@ -45,9 +50,13 @@ function childReconciler(shouldTrackEffects: boolean) {
 			if (currentFiber.key === key) {
 				// key 相同
 				if (element.$$typeof === REACT_ELEMENT_TYPE) {
-					if (currentFiber.type === element.type) {
+					if ((currentFiber.type = childReconciler)) {
+						let props = element.props;
+						if (element.type === REACT_FRAGMENT_TYPE) {
+							props = element.props.children;
+						}
 						// type 相同
-						const existing = useFiber(currentFiber, element.props);
+						const existing = useFiber(currentFiber, props);
 						existing.return = returnFiber;
 						// 标记剩下节点为删除
 						deleteRemainingChildren(returnFiber, currentFiber.sibling);
@@ -70,7 +79,12 @@ function childReconciler(shouldTrackEffects: boolean) {
 		}
 
 		// 创建新的fiber
-		const fiber = createFiberFromElement(element);
+		let fiber;
+		if (element.type === REACT_FRAGMENT_TYPE) {
+			fiber = createFiberFromFragment(element.props.children, key);
+		} else {
+			fiber = createFiberFromElement(element);
+		}
 		fiber.return = returnFiber;
 		return fiber;
 	}
@@ -201,6 +215,15 @@ function childReconciler(shouldTrackEffects: boolean) {
 		if (typeof element === 'object' && element !== null) {
 			switch (element.$$typeof) {
 				case REACT_ELEMENT_TYPE:
+					if (element.type === REACT_FRAGMENT_TYPE) {
+						return updateFragment(
+							returnFiber,
+							before,
+							element,
+							keyToUse,
+							element
+						);
+					}
 					if (before) {
 						if (before.type === element.type) {
 							existingChildren.delete(keyToUse);
@@ -210,11 +233,17 @@ function childReconciler(shouldTrackEffects: boolean) {
 
 					return createFiberFromElement(element);
 			}
+		}
 
-			// TODO 数组类型，比如直接在元素里面使用 [li,li]
-			if (Array.isArray(element) && __DEV__) {
-				console.warn('还未实现类型的child');
-			}
+		// 处理一个数组变量
+		if (Array.isArray(element)) {
+			return updateFragment(
+				returnFiber,
+				before,
+				element,
+				keyToUse,
+				existingChildren
+			);
 		}
 		return null;
 	}
@@ -224,6 +253,16 @@ function childReconciler(shouldTrackEffects: boolean) {
 		currentFiber: FiberNode | null,
 		newChild?: ReactElementType
 	) {
+		// 判断fragment,顶层的比如<><div></div><div></div></>
+		const isNoKeyTopLevelFragment =
+			typeof newChild === 'object' &&
+			newChild.type === REACT_FRAGMENT_TYPE &&
+			newChild.key === null;
+
+		if (isNoKeyTopLevelFragment) {
+			newChild = newChild?.props.children;
+		}
+
 		// 判断当前fiber类型
 		if (typeof newChild === 'object' && newChild !== null) {
 			switch (newChild.$$typeof) {
@@ -252,7 +291,7 @@ function childReconciler(shouldTrackEffects: boolean) {
 
 		// 兜底删除
 		if (currentFiber !== null) {
-			deleteChild(returnFiber, currentFiber);
+			deleteRemainingChildren(returnFiber, currentFiber);
 		}
 
 		if (__DEV__) {
@@ -271,3 +310,23 @@ function useFiber(fiber: FiberNode, pendingProps: Props): FiberNode {
 
 export const reconcileChildFibers = childReconciler(true);
 export const mountChildFibers = childReconciler(false);
+
+function updateFragment(
+	returnFiber: FiberNode,
+	current: FiberNode | undefined,
+	elements: any[],
+	key: Key,
+	existingChildren: ExistingChildren
+) {
+	let fiber;
+	if (!current || current.tag !== Fragment) {
+		fiber = createFiberFromFragment(elements, key);
+	} else {
+		existingChildren.delete(key);
+
+		// 复用fiber
+		fiber = useFiber(current, elements);
+	}
+	fiber.return = returnFiber;
+	return fiber;
+}

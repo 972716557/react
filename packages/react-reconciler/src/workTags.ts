@@ -2,7 +2,8 @@ export type WorkTag =
 	| typeof FunctionComponent
 	| typeof HostComponent
 	| typeof HostRoot
-	| typeof HostText;
+	| typeof HostText
+	| typeof Fragment;
 
 // 函数组件
 export const FunctionComponent = 0;
@@ -15,3 +16,5 @@ export const HostComponent = 5;
 
 // 文本类型
 export const HostText = 6;
+
+export const Fragment = 7;

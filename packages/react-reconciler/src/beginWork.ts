@@ -4,6 +4,7 @@ import { ReactElementType } from 'shared/ReactTypes';
 import { FiberNode } from './fiber';
 import { UpdateQueue, processUpdateQueue } from './updateQueue';
 import {
+	Fragment,
 	FunctionComponent,
 	HostComponent,
 	HostRoot,
@@ -23,6 +24,8 @@ export const beginWork = (workInProgress: FiberNode): FiberNode | null => {
 			return null;
 		case FunctionComponent:
 			return updateFunctionComponent(workInProgress);
+		case Fragment:
+			return updateFragment(workInProgress);
 		default:
 			if (__DEV__) {
 				console.warn('beginWork未实现的类型');
@@ -75,4 +78,10 @@ function reconcileChildren(
 		// 初次挂载, 因为第一次挂在每一个placement都是插入，所以不用每一次都执行placement，统一在父节点就好
 		workInProgress.child = mountChildFibers(workInProgress, null, children);
 	}
+}
+
+function updateFragment(workInProgress: FiberNode) {
+	const nextChildren = workInProgress.pendingProps;
+	reconcileChildren(workInProgress, nextChildren);
+	return workInProgress.child;
 }

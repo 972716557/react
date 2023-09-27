@@ -15,6 +15,7 @@ import {
 	Update
 } from './fiberFlags';
 import {
+	Fragment,
 	FunctionComponent,
 	HostComponent,
 	HostRoot,
@@ -78,22 +79,40 @@ const commitMutationEffectOnFiber = (finishedWork: FiberNode) => {
 	}
 };
 
+// diff的时候如果需要删除Fragment则需要遍历Fragment下面所有的节点都删除掉
+function recordHostChildrenToDelete(
+	childeToDelete: FiberNode[],
+	unmountFiber: FiberNode
+) {
+	// 1. 找到第一个root host节点
+	const lastOne = childeToDelete[childeToDelete.length - 1];
+	if (!lastOne) {
+		childeToDelete.push(unmountFiber);
+	} else {
+		let node = lastOne.sibling;
+		while (node !== null) {
+			if (unmountFiber === node) {
+				childeToDelete.push(unmountFiber);
+			}
+			node = node.sibling;
+		}
+	}
+
+	// 2. 每找到一个host节点，判断这个节点是不是第一个找到的节点的兄弟节点
+}
+
 // 需要递归删除所有子节点
 function commitDeletion(childeToDelete: FiberNode) {
-	let rootHostNode: FiberNode | null = null;
+	const rootChildToDelete: FiberNode[] = [];
 	// 递归子树
 	commitNestedComponent(childeToDelete, (unmountFiber) => {
 		switch (unmountFiber.tag) {
 			case HostComponent:
-				if (rootHostNode === null) {
-					rootHostNode = unmountFiber;
-				}
+				recordHostChildrenToDelete(rootChildToDelete, unmountFiber);
 				// TODO 解绑ref
 				return;
 			case HostText:
-				if (rootHostNode === null) {
-					rootHostNode = unmountFiber;
-				}
+				recordHostChildrenToDelete(rootChildToDelete, unmountFiber);
 				return;
 			case FunctionComponent:
 				// TODO: useEffect Unmount
@@ -107,10 +126,12 @@ function commitDeletion(childeToDelete: FiberNode) {
 	});
 
 	// 移除rootHostNode的Dom
-	if (rootHostNode !== null) {
+	if (rootChildToDelete.length) {
 		const hostParent = getHostParent(childeToDelete);
 		if (hostParent !== null) {
-			removeChild((rootHostNode as FiberNode).stateNode, hostParent);
+			rootChildToDelete.forEach((node) => {
+				removeChild(node.stateNode, hostParent);
+			});
 		}
 	}
 	childeToDelete.return = null;
@@ -155,7 +176,7 @@ const commitPlacement = (finishedWork: FiberNode) => {
 	const hostParent = getHostParent(finishedWork);
 	// finishedWork ~~DOM append parent DOM
 	if (hostParent !== null) {
-		insertOrAppendPlacementNodeIntoContainer(finishedWork, hostParent);
+		insertOrAppendPlacementNodeIntoContainer(finishedWork, hostParent, sibling);
 	}
 };
 
