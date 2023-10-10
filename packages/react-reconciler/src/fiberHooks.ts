@@ -10,10 +10,12 @@ import {
 } from './updateQueue';
 import { Action } from 'shared/ReactTypes';
 import { scheduleUpdateOnFiber } from './workLoop';
+import { Lane, NoLane, requestUpdateLanes } from './fiberLanes';
 
 let currentRenderingFiber: FiberNode | null = null;
 let workInProgressHook: Hook | null = null;
 let currentHook: Hook | null = null;
+let renderLane: Lane = NoLane;
 
 interface Hook {
 	memorizedState: any;
@@ -21,10 +23,11 @@ interface Hook {
 	next: Hook | null;
 }
 const { currentDispatcher } = internals;
-export function renderWithHooks(workInProgress: FiberNode) {
+export function renderWithHooks(workInProgress: FiberNode, lane: Lane) {
 	// 复制操作
 	currentRenderingFiber = workInProgress;
 	workInProgress.memorizedState = null;
+	renderLane = lane;
 	const current = workInProgress.alternate;
 	if (current !== null) {
 		// update
@@ -38,6 +41,9 @@ export function renderWithHooks(workInProgress: FiberNode) {
 
 	// 重置操作
 	currentRenderingFiber = null;
+	renderLane = NoLane;
+	workInProgressHook = null;
+	currentHook = null;
 
 	return children;
 }
@@ -67,6 +73,7 @@ function mountState<State>(
 	// @ts-ignore
 	const dispatch = dispatchSetState.bind(null, currentRenderingFiber, queue);
 	queue.dispatch = dispatch;
+
 	return [memorizedState, dispatch];
 }
 
@@ -77,7 +84,11 @@ function updateState<State>(): [State, Dispatch<State>] {
 	const pending = queue.shared.pending;
 
 	if (pending !== null) {
-		const { memorizedState } = processUpdateQueue(hook.memorizedState, pending);
+		const { memorizedState } = processUpdateQueue(
+			hook.memorizedState,
+			pending,
+			renderLane
+		);
 		hook.memorizedState = memorizedState;
 	}
 
@@ -89,9 +100,10 @@ function dispatchSetState<State>(
 	updateQueue: UpdateQueue<State>,
 	action: Action<State>
 ) {
-	const update = createUpdate(action);
+	const lane = requestUpdateLanes();
+	const update = createUpdate(action, lane);
 	enqueueUpdate(updateQueue, update);
-	scheduleUpdateOnFiber(fiber);
+	scheduleUpdateOnFiber(fiber, lane);
 }
 
 function mountWorkInProgressHook(): Hook {

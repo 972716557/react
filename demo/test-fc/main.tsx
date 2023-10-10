@@ -2,29 +2,17 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 
 function App() {
-	const [number, setNumber] = useState<boolean>(false);
-	const arr = number
-		? [<li key="1">1</li>, <li key="2">2</li>, <li key="3">3</li>]
-		: [<li key="3">3</li>, <li key="2">2</li>, <li key="1">1</li>];
+	const [number, setNumber] = useState<number>(1);
+
 	return (
 		<div
 			onClick={() => {
-				setNumber(!number);
+				setNumber((num) => num + 1);
+				setNumber((num) => num + 1);
+				setNumber((num) => num + 1);
 			}}
 		>
-			{number ? (
-				<>
-					<li key="1">1</li>
-					<li key="2">2</li>
-					<li key="3">3</li>
-				</>
-			) : (
-				<>
-					<li key="3">3</li>
-					<li key="2">2</li>
-					<li key="1">1</li>
-				</>
-			)}
+			<>1111</>
 		</div>
 	);
 }

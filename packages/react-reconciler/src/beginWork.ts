@@ -12,18 +12,22 @@ import {
 } from './workTags';
 import { mountChildFibers, reconcileChildFibers } from './childFiber';
 import { renderWithHooks } from './fiberHooks';
+import { Lane } from './fiberLanes';
 
-export const beginWork = (workInProgress: FiberNode): FiberNode | null => {
+export const beginWork = (
+	workInProgress: FiberNode,
+	renderLane: Lane
+): FiberNode | null => {
 	// 比较然后再返回 “子fiberNode”
 	switch (workInProgress.tag) {
 		case HostRoot:
-			return updateHostRoot(workInProgress);
+			return updateHostRoot(workInProgress, renderLane);
 		case HostComponent:
 			return updateHostComponent(workInProgress);
 		case HostText:
 			return null;
 		case FunctionComponent:
-			return updateFunctionComponent(workInProgress);
+			return updateFunctionComponent(workInProgress, renderLane);
 		case Fragment:
 			return updateFragment(workInProgress);
 		default:
@@ -35,17 +39,17 @@ export const beginWork = (workInProgress: FiberNode): FiberNode | null => {
 	return null;
 };
 
-function updateFunctionComponent(workInProgress: FiberNode) {
-	const nextChildren = renderWithHooks(workInProgress);
+function updateFunctionComponent(workInProgress: FiberNode, renderLane: Lane) {
+	const nextChildren = renderWithHooks(workInProgress, renderLane);
 	reconcileChildren(workInProgress, nextChildren);
 	return workInProgress.child;
 }
-function updateHostRoot(workInProgress: FiberNode) {
+function updateHostRoot(workInProgress: FiberNode, renderLane: Lane) {
 	const baseState = workInProgress.memorizedState;
 	const updateQueue = workInProgress.updateQueue as UpdateQueue<Element>;
 	const pending = updateQueue.shared.pending;
 	updateQueue.shared.pending = null;
-	const { memorizedState } = processUpdateQueue(baseState, pending);
+	const { memorizedState } = processUpdateQueue(baseState, pending, renderLane);
 	workInProgress.memorizedState = memorizedState;
 	const nextChildren = workInProgress.memorizedState;
 	reconcileChildren(workInProgress, nextChildren);
