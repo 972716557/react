@@ -69,10 +69,10 @@ function markUpdateFromFiberOnFiber(fiber: FiberNode) {
 
 function performSyncWorkOnRoot(root: FiberRootNode, lane: Lane) {
 	const nextLane = getHighestPriorityLane(root.pendingLanes);
+	console.log(nextLane, 'nextLane');
 	if (nextLane !== SyncLane) {
 		// 	其他比SyncLane低的优先级或noLane
 		ensureRootIsScheduled(root);
-		return;
 	}
 
 	if (__DEV__) {
